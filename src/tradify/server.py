@@ -8,6 +8,8 @@ from .db import engine
 
 from tradify.transaction.routes import router as  tx_router
 from tradify.user.routes import router as user_router
+from tradify.wallet.routes import router as wallet_router
+
 
 
 @asynccontextmanager
@@ -24,6 +26,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(tx_router)
 app.include_router(user_router)
+app.include_router(wallet_router)
 
 
 

@@ -7,8 +7,6 @@ from .schema import TransactionTrade, TransactionFund, TransactionWithdraw
 router = APIRouter(prefix='/transactions', tags=['Transactions'])
 
 def get_transaction_service() -> TransactionService:
-    # Replace with your actual dependency logic
-    from tradify.db import session_factory  # Example import
     return TransactionService(session_factory)
 
 @router.get('/{user_id}')
@@ -33,11 +31,12 @@ def fund(
     service: TransactionService = Depends(get_transaction_service)
 ):
     result = service.fund(data.user_id, data.amount)
-    if result:
-        return {"success": True}
+    if isinstance(result, dict) and result.get("success"):
+        return result
     
-    print(result, 'this is the result')
-    raise HTTPException(status_code=400, detail="Funding failed.")
+    if not isinstance(result, dict):
+        result = {'result': result}
+    raise HTTPException(status_code=400, detail={'message':"Funding failed.", **result})
 
 @router.post('/withdraw')
 def withdraw(
@@ -47,7 +46,10 @@ def withdraw(
     result = service.withdraw(data.user_id, data.currency_code, data.amount)
     if isinstance(result, dict) and result.get("success"):
         return result
-    raise HTTPException(status_code=400, detail="Withdrawal failed.")
+    
+    if not isinstance(result, dict):
+        result = {'result': result}
+    raise HTTPException(status_code=400, detail={'message': "Withdrawal failed.", **result})
 
 @router.post('/trade')
 def trade(
@@ -57,4 +59,7 @@ def trade(
     result = service.trade(data.user_id, data.from_code, data.to_code, data.amount)
     if isinstance(result, dict) and result.get("success"):
         return result
-    raise HTTPException(status_code=400, detail="Trade failed.")
+    
+    if not isinstance(result, dict):
+        result = {'result': result}
+    raise HTTPException(status_code=400, detail={'message':"Trade failed.", **result})

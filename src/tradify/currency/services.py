@@ -7,10 +7,7 @@ import os
 class CurrencyService:
 
     def __init__(self, session:Session):
-        
         self.session =  session
-
-
     def currency_get(self, code: str)-> Currency | None:
         statement = select(Currency).where(Currency.code == code)
         currency = self.session.exec(statement).first()
